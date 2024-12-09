@@ -25,27 +25,22 @@ let isTouch = false;
 let previousCoords = null;
 
 // Event listeners
-svg.addEventListener("mousedown", (e) => {
+svg.addEventListener("pointerdown", (e) => {
   if (!isTouch) {
+    e.target.setPointerCapture(e.pointerId);
     startDrawing(e);
     draw(e);
   }
 });
-svg.addEventListener("mousemove", (e) => {
+svg.addEventListener("pointermove", (e) => {
   if (!isTouch) draw(e);
 });
-svg.addEventListener("mouseup", (e) => {
-  if (!isTouch) stopDrawing(e);
+svg.addEventListener("pointerup", (e) => {
+  if (!isTouch) {
+    e.target.releasePointerCapture(e.pointerId);
+    stopDrawing(e);
+  }
 });
-svg.addEventListener("mouseout", (e) => {
-  if (!isTouch) stopDrawing(e);
-});
-
-// Add touch event listeners
-svg.addEventListener("touchstart", handleTouchStart);
-svg.addEventListener("touchmove", handleTouchMove);
-svg.addEventListener("touchend", stopDrawing);
-svg.addEventListener("touchcancel", stopDrawing);
 
 // Replace colorPicker event listener with new color palette handler
 document.querySelectorAll('.color-button').forEach(button => {
@@ -86,9 +81,10 @@ function getCoordinates(e) {
       offsetY: touch.clientY - rect.top,
     };
   }
+  const rect = svg.getBoundingClientRect();
   return {
-    offsetX: e.offsetX,
-    offsetY: e.offsetY,
+    offsetX: e.clientX - rect.left,
+    offsetY: e.clientY - rect.top,
   };
 }
 
