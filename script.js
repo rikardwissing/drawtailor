@@ -360,12 +360,16 @@ function showGuessesSequentially(guesses, index = 0, onComplete = null) {
   const textWidth = guess.offsetWidth;
   const textHeight = guess.offsetHeight;
 
-  const svgHeight = 400;
-  const svgWidth = 600;
-  const padding = 40;
+  // Get actual SVG dimensions
+  const svgRect = svg.getBoundingClientRect();
+  const svgHeight = svgRect.height;
+  const svgWidth = svgRect.width;
+  
+  // Make padding proportional to SVG size (using same ratio as original 40/600 ≈ 0.067)
+  const padding = Math.min(svgWidth, svgHeight) * 0.067;
 
   let x, y;
-  const randomOffset = 20;
+  const randomOffset = padding / 2; // Scale random offset with padding
   let rotation = -15;
 
   switch (index) {
