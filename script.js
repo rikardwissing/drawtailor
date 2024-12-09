@@ -25,8 +25,8 @@ const scoreDisplay = document.getElementById("scoreDisplay");
 let currentScore = 0;
 
 // Disable drawing initially
-svg.classList.add('svg-disabled');
-toolsContainer.classList.add('submitted');
+svg.classList.add("svg-disabled");
+toolsContainer.classList.add("submitted");
 
 // Drawing settings
 let isDrawing = false;
@@ -38,7 +38,10 @@ let previousCoords = null;
 
 // Event listeners
 svg.addEventListener("mousedown", (e) => {
-  if (!isTouch) startDrawing(e);
+  if (!isTouch) {
+    startDrawing(e);
+    draw(e);
+  }
 });
 svg.addEventListener("mousemove", (e) => {
   if (!isTouch) draw(e);
@@ -141,11 +144,12 @@ function draw(e) {
 }
 
 // Add these utility functions
-function getPathPoints(path, pointDensity = 0.1) { // Points per pixel
+function getPathPoints(path, pointDensity = 0.1) {
+  // Points per pixel
   const length = path.getTotalLength();
   const numPoints = Math.max(1, Math.floor(length * pointDensity)); // At least 10 points
   const points = [];
-  
+
   for (let i = 0; i <= numPoints; i++) {
     const point = path.getPointAtLength(length * (i / numPoints));
     points.push({ x: point.x, y: point.y });
@@ -156,37 +160,42 @@ function getPathPoints(path, pointDensity = 0.1) { // Points per pixel
 function animatePath(pathElement) {
   const originalPoints = getPathPoints(pathElement, 0.1); // 1 point per 10 pixels
   const offsets = originalPoints.map(() => ({ x: 0, y: 0 }));
-  const speeds = originalPoints.map(() => ({ x: Math.random() * 2 - 1, y: Math.random() * 2 - 1 }));
-  
+  const speeds = originalPoints.map(() => ({
+    x: Math.random() * 2 - 1,
+    y: Math.random() * 2 - 1,
+  }));
+
   function animate() {
     // Update offsets with some random movement
     offsets.forEach((offset, i) => {
       offset.x += speeds[i].x * 0.2;
       offset.y += speeds[i].y * 0.2;
-      
+
       // Bounce effect
       if (Math.abs(offset.x) > 2) speeds[i].x *= -1;
       if (Math.abs(offset.y) > 2) speeds[i].y *= -1;
     });
 
     // Construct new path data
-    let d = `M${originalPoints[0].x + offsets[0].x},${originalPoints[0].y + offsets[0].y}`;
+    let d = `M${originalPoints[0].x + offsets[0].x},${
+      originalPoints[0].y + offsets[0].y
+    }`;
     for (let i = 1; i < originalPoints.length; i++) {
       const x = originalPoints[i].x + offsets[i].x;
       const y = originalPoints[i].y + offsets[i].y;
-      const prevX = originalPoints[i-1].x + offsets[i-1].x;
-      const prevY = originalPoints[i-1].y + offsets[i-1].y;
-      
+      const prevX = originalPoints[i - 1].x + offsets[i - 1].x;
+      const prevY = originalPoints[i - 1].y + offsets[i - 1].y;
+
       // Use quadratic bezier curves for smooth transitions
       const cpX = (prevX + x) / 2;
       const cpY = (prevY + y) / 2;
       d += ` Q${prevX},${prevY} ${cpX},${cpY}`;
     }
-    
-    pathElement.setAttribute('d', d);
+
+    pathElement.setAttribute("d", d);
     requestAnimationFrame(animate);
   }
-  
+
   requestAnimationFrame(animate);
 }
 
@@ -210,90 +219,133 @@ function clearCanvas() {
 function svgToWebp(svg) {
   return new Promise((resolve) => {
     // Create canvas with white background
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
     const svgSize = svg.getBoundingClientRect();
-    
+
     // Set canvas size to match SVG
     canvas.width = svgSize.width;
     canvas.height = svgSize.height;
-    
+
     // Draw white background
-    ctx.fillStyle = 'white';
+    ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     // Convert SVG to data URL
     const svgData = new XMLSerializer().serializeToString(svg);
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml' });
+    const svgBlob = new Blob([svgData], { type: "image/svg+xml" });
     const url = URL.createObjectURL(svgBlob);
-    
+
     // Draw SVG on canvas
     const img = new Image();
     img.onload = () => {
       ctx.drawImage(img, 0, 0);
       URL.revokeObjectURL(url);
       // Convert to WebP with quality 0.8 (good balance between size and quality)
-      resolve(canvas.toDataURL('image/webp', 0.8));
+      resolve(canvas.toDataURL("image/webp", 0.8));
     };
     img.src = url;
   });
 }
 
 function disableDrawing() {
-  svg.classList.add('svg-disabled');
-  toolsContainer.classList.add('submitted');
+  svg.classList.add("svg-disabled");
+  toolsContainer.classList.add("submitted");
 }
 
 function enableDrawing() {
-  svg.classList.remove('svg-disabled');
-  toolsContainer.classList.remove('submitted');
+  svg.classList.remove("svg-disabled");
+  toolsContainer.classList.remove("submitted");
   doneButton.disabled = false;
+}
+
+// Add after initial constants
+const mockChallenges = [
+  "Draw a happy cloud",
+  "Draw a dancing cat",
+  "Draw a silly monster",
+  "Draw a magic wand",
+  "Draw a flying pizza",
+];
+
+const mockGuesses = [
+  ["A fluffy cloud!", "Cotton candy", "A dream bubble", "A floating sheep"],
+  ["A ballet dancer", "A jumping cat", "A disco star", "A party animal"],
+  ["A fuzzy beast", "A friendly alien", "A goofy creature", "A weird dragon"],
+  [
+    "A sparkly stick",
+    "A wizard's wand",
+    "A magical branch",
+    "A glowing scepter",
+  ],
+  [
+    "A flying saucer",
+    "A levitating pizza",
+    "A space snack",
+    "A floating feast",
+  ],
+];
+
+// Replace API key check with mock data setup
+const urlParams = new URLSearchParams(window.location.search);
+const apiKey = urlParams.get("key");
+const useMockData = !apiKey;
+
+if (useMockData) {
+  alert(
+    "No API key provided - using mock data instead, you can add your openai API key as a URL parameter: ?key=your-key-here"
+  );
 }
 
 // Add new function to get drawing prompt
 function getDrawingPrompt() {
-    return fetch("https://api.openai.com/v1/chat/completions", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer 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"
+  if (useMockData) {
+    const randomIndex = Math.floor(Math.random() * mockChallenges.length);
+    return Promise.resolve(mockChallenges[randomIndex]);
+  }
+  return fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a fun drawing game host. Suggest one simple, creative, and fun thing to draw. Keep it to one short sentence. Make it easy enough to draw! Output it like, draw a ....",
         },
-        body: JSON.stringify({
-            model: "gpt-4o-mini",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are a fun drawing game host. Suggest one simple, creative, and fun thing to draw. Keep it to one short sentence. Make it easy enough to draw! Output it like, draw a ...."
-                },
-                {
-                    role: "user",
-                    content: "Give me something fun to draw!"
-                }
-            ],
-            max_tokens: 50
-        })
-    })
-    .then(response => response.json())
-    .then(data => data.choices[0].message.content);
+        {
+          role: "user",
+          content: "Give me something fun to draw!",
+        },
+      ],
+      max_tokens: 50,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => data.choices[0].message.content);
 }
 
 // Modify startNewDrawing function
 function startNewDrawing() {
-    clearCanvas();
-    updateScore();
-    hideScoreButtons();
+  clearCanvas();
+  updateScore();
+  hideScoreButtons();
 
-    drawingPrompt.textContent = "Getting your challenge...";
-    
-    getDrawingPrompt().then(prompt => {
-        drawingPrompt.textContent = "Your challenge: " + prompt;
-        enableDrawing();
-    });
+  drawingPrompt.textContent = "Getting your challenge...";
 
-    // Remove old guesses when starting new round
-    while (guessContainer.firstChild) {
-      guessContainer.removeChild(guessContainer.firstChild);
-    }
+  getDrawingPrompt().then((prompt) => {
+    drawingPrompt.textContent = "Your challenge: " + prompt;
+    enableDrawing();
+  });
+
+  // Remove old guesses when starting new round
+  while (guessContainer.firstChild) {
+    guessContainer.removeChild(guessContainer.firstChild);
+  }
 }
 
 // Replace showGuessesSequentially function with this version
@@ -303,112 +355,123 @@ function showGuessesSequentially(guesses, index = 0, onComplete = null) {
     return;
   }
 
-  const guess = document.createElement('div');
-  guess.className = 'guess';
+  const guess = document.createElement("div");
+  guess.className = "guess";
   guess.textContent = guesses[index].trim();
-  
+
   // Temporarily append to measure text width
-  guess.style.visibility = 'hidden';
+  guess.style.visibility = "hidden";
   guessContainer.appendChild(guess);
   const textWidth = guess.offsetWidth;
   const textHeight = guess.offsetHeight;
-  
+
   const svgHeight = 400;
   const svgWidth = 600;
   const padding = 40;
-  
+
   // Position guesses in corners with some random offset
   let x, y;
   const randomOffset = 20; // Small random offset for variation
   let rotation = -15;
 
-  switch(index) {
+  switch (index) {
     case 0: // Top left
       x = padding + Math.random() * randomOffset;
       y = padding + Math.random() * randomOffset;
-      rotation = -15
+      rotation = -15;
       break;
     case 1: // Top right
       x = svgWidth - padding - textWidth - Math.random() * randomOffset;
       y = padding + Math.random() * randomOffset;
-      rotation = 15
+      rotation = 15;
       break;
     case 2: // Bottom left
       x = padding + Math.random() * randomOffset;
       y = svgHeight - padding - textHeight - Math.random() * randomOffset;
-      rotation = 15
+      rotation = 15;
       break;
     case 3: // Bottom right
       x = svgWidth - padding - textWidth - Math.random() * randomOffset;
       y = svgHeight - padding - textHeight - Math.random() * randomOffset;
-      rotation = -15
+      rotation = -15;
       break;
   }
-  
+
   // Rest of the function remains the same...
-  guess.style.visibility = 'visible';
+  guess.style.visibility = "visible";
   Object.assign(guess.style, {
     left: `${x}px`,
     top: `${y}px`,
     transform: `rotate(${rotation}deg) scale(0.5)`,
-    opacity: '0'
+    opacity: "0",
   });
 
   // Rest of animation code remains the same
   let wobblePhase = 0;
   let fadeInComplete = false;
-  
+
   function animate() {
     wobblePhase += 0.1;
     const wobble = Math.sin(wobblePhase) * 1; // Reduced wobble amplitude
-    const scale = fadeInComplete ? 1 + Math.sin(wobblePhase * 0.5) * 0.03 : 0.5 + (1 - 0.5) * guess.style.opacity;
-    
+    const scale = fadeInComplete
+      ? 1 + Math.sin(wobblePhase * 0.5) * 0.03
+      : 0.5 + (1 - 0.5) * guess.style.opacity;
+
     guess.style.transform = `rotate(${rotation + wobble}deg) scale(${scale})`;
-    
+
     if (!fadeInComplete) {
       const newOpacity = parseFloat(guess.style.opacity) + 0.02;
       guess.style.opacity = newOpacity;
-      
+
       if (newOpacity >= 1) {
         fadeInComplete = true;
         // Increased delay between guesses
-        setTimeout(() => showGuessesSequentially(guesses, index + 1, onComplete), 400);
+        setTimeout(
+          () => showGuessesSequentially(guesses, index + 1, onComplete),
+          400
+        );
       }
     }
-    
+
     requestAnimationFrame(animate);
   }
 
   requestAnimationFrame(animate);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener("DOMContentLoaded", () => {
   startNewDrawing();
 });
-
 
 function finishMasterpiece() {
   isDrawing = false;
   doneButton.disabled = true;
   disableDrawing();
-  
-  const paths = Array.from(svg.getElementsByTagName('path'));
+
+  const paths = Array.from(svg.getElementsByTagName("path"));
   paths.forEach(animatePath);
-  
+
+  if (useMockData) {
+    const randomIndex = Math.floor(Math.random() * mockGuesses.length);
+    showGuessesSequentially(mockGuesses[randomIndex], 0, showScoreButtons);
+    return;
+  }
+
   // Convert SVG to WebP before sending to API
-  svgToWebp(svg).then(webpData => {
+  svgToWebp(svg).then((webpData) => {
     fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer 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"
+        Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: "You are playing a drawing guessing game. Give 4 different guesses about what the drawing might be. Each answer should just be a word or a phrase. Make each guess fun and enthusiastic! Format output with one guess per line. Only answer with the guesses. Do not add any number or dashes to prefix the guess."
+            content:
+              "You are playing a drawing guessing game. Give 4 different guesses about what the drawing might be. Each answer should just be a word or a phrase. Make each guess fun and enthusiastic! Format output with one guess per line. Only answer with the guesses. Do not add any number or dashes to prefix the guess.",
           },
           {
             role: "user",
@@ -416,20 +479,20 @@ function finishMasterpiece() {
               {
                 type: "image_url",
                 image_url: {
-                  url: webpData
-                }
-              }
-            ]
-          }
+                  url: webpData,
+                },
+              },
+            ],
+          },
         ],
-        max_tokens: 150
-      })
+        max_tokens: 150,
+      }),
     })
-    .then(response => response.json())
-    .then(data => {
-      const guesses = data.choices[0].message.content.split('\n');
-      showGuessesSequentially(guesses, 0, showScoreButtons);
-    });
+      .then((response) => response.json())
+      .then((data) => {
+        const guesses = data.choices[0].message.content.split("\n");
+        showGuessesSequentially(guesses, 0, showScoreButtons);
+      });
   });
 }
 
@@ -450,13 +513,13 @@ function updateScore() {
 }
 
 function showScoreButtons() {
-  gainPointButton.style.display = 'inline-block';
-  losePointButton.style.display = 'inline-block';
+  gainPointButton.style.display = "inline-block";
+  losePointButton.style.display = "inline-block";
 }
 
 // Modify the hideScoreButtons function to reset the game
 function hideScoreButtons() {
-  gainPointButton.style.display = 'none';
-  losePointButton.style.display = 'none';
+  gainPointButton.style.display = "none";
+  losePointButton.style.display = "none";
   // Start new drawing automatically when hiding score buttons
 }
