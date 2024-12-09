@@ -1,24 +1,12 @@
 const svg = document.getElementById("drawingSvg");
 const clearButton = document.getElementById("clearButton");
-const colorPicker = document.getElementById("colorPicker");
-const brushSizeInput = document.getElementById("brushSize");
+// Remove brushSizeInput constant
 const interpretButton = document.getElementById("interpretButton");
-const aiResult = document.getElementById("aiResult");
-
-// Remove saveButton, interpretButton, savedImage references and their event listeners
 const doneButton = document.getElementById("doneButton");
-
-// Remove the newDrawingButton reference
 // const newDrawingButton = document.getElementById("newDrawingButton");
 const toolsContainer = document.querySelector(".tools");
-
-// Add after initial constants
 const drawingPrompt = document.getElementById("drawingPrompt");
-
-// Add after initial constants
 const guessContainer = document.getElementById("guessContainer");
-
-// Add new button references and score tracking
 const gainPointButton = document.getElementById("gainPointButton");
 const losePointButton = document.getElementById("losePointButton");
 const scoreDisplay = document.getElementById("scoreDisplay");
@@ -30,8 +18,8 @@ toolsContainer.classList.add("submitted");
 
 // Drawing settings
 let isDrawing = false;
-let brushColor = colorPicker.value;
-let brushSize = parseInt(brushSizeInput.value, 10);
+let brushColor = "#000000"; // Default color
+let brushSize = 5; // Fixed brush size
 let currentPath = null;
 let isTouch = false;
 let previousCoords = null;
@@ -59,13 +47,16 @@ svg.addEventListener("touchmove", handleTouchMove);
 svg.addEventListener("touchend", stopDrawing);
 svg.addEventListener("touchcancel", stopDrawing);
 
-colorPicker.addEventListener("change", (e) => {
-  brushColor = e.target.value;
+// Replace colorPicker event listener with new color palette handler
+document.querySelectorAll('.color-button').forEach(button => {
+  button.addEventListener('click', (e) => {
+    document.querySelectorAll('.color-button').forEach(b => b.classList.remove('selected'));
+    e.target.classList.add('selected');
+    brushColor = e.target.dataset.color;
+  });
 });
 
-brushSizeInput.addEventListener("change", (e) => {
-  brushSize = e.target.value;
-});
+// Remove brushSizeInput event listener
 
 clearButton.addEventListener("click", clearCanvas);
 doneButton.addEventListener("click", finishMasterpiece);
@@ -103,8 +94,8 @@ function getCoordinates(e) {
 
 function startDrawing(e) {
   isDrawing = true;
-  brushColor = colorPicker.value;
-  brushSize = parseInt(brushSizeInput.value, 10);
+  brushColor = document.querySelector('.color-button.selected').dataset.color;
+  // Remove brushSize input parsing
   const coords = getCoordinates(e);
 
   // Create a new path for the stroke
@@ -259,7 +250,6 @@ function enableDrawing() {
   doneButton.disabled = false;
 }
 
-// Add after initial constants
 const mockChallenges = [
   "Draw a happy cloud",
   "Draw a dancing cat",
@@ -286,7 +276,6 @@ const mockGuesses = [
   ],
 ];
 
-// Replace API key check with mock data setup
 const urlParams = new URLSearchParams(window.location.search);
 const apiKey = urlParams.get("key");
 const useMockData = !apiKey;
@@ -297,7 +286,6 @@ if (useMockData) {
   );
 }
 
-// Add new function to get drawing prompt
 function getDrawingPrompt() {
   if (useMockData) {
     const randomIndex = Math.floor(Math.random() * mockChallenges.length);
@@ -329,7 +317,6 @@ function getDrawingPrompt() {
     .then((data) => data.choices[0].message.content);
 }
 
-// Modify startNewDrawing function
 function startNewDrawing() {
   clearCanvas();
   updateScore();
@@ -342,13 +329,11 @@ function startNewDrawing() {
     enableDrawing();
   });
 
-  // Remove old guesses when starting new round
   while (guessContainer.firstChild) {
     guessContainer.removeChild(guessContainer.firstChild);
   }
 }
 
-// Replace showGuessesSequentially function with this version
 function showGuessesSequentially(guesses, index = 0, onComplete = null) {
   if (index >= guesses.length) {
     if (onComplete) onComplete();
@@ -359,7 +344,6 @@ function showGuessesSequentially(guesses, index = 0, onComplete = null) {
   guess.className = "guess";
   guess.textContent = guesses[index].trim();
 
-  // Temporarily append to measure text width
   guess.style.visibility = "hidden";
   guessContainer.appendChild(guess);
   const textWidth = guess.offsetWidth;
@@ -369,35 +353,33 @@ function showGuessesSequentially(guesses, index = 0, onComplete = null) {
   const svgWidth = 600;
   const padding = 40;
 
-  // Position guesses in corners with some random offset
   let x, y;
-  const randomOffset = 20; // Small random offset for variation
+  const randomOffset = 20;
   let rotation = -15;
 
   switch (index) {
-    case 0: // Top left
+    case 0:
       x = padding + Math.random() * randomOffset;
       y = padding + Math.random() * randomOffset;
       rotation = -15;
       break;
-    case 1: // Top right
+    case 1:
       x = svgWidth - padding - textWidth - Math.random() * randomOffset;
       y = padding + Math.random() * randomOffset;
       rotation = 15;
       break;
-    case 2: // Bottom left
+    case 2:
       x = padding + Math.random() * randomOffset;
       y = svgHeight - padding - textHeight - Math.random() * randomOffset;
       rotation = 15;
       break;
-    case 3: // Bottom right
+    case 3:
       x = svgWidth - padding - textWidth - Math.random() * randomOffset;
       y = svgHeight - padding - textHeight - Math.random() * randomOffset;
       rotation = -15;
       break;
   }
 
-  // Rest of the function remains the same...
   guess.style.visibility = "visible";
   Object.assign(guess.style, {
     left: `${x}px`,
@@ -406,13 +388,12 @@ function showGuessesSequentially(guesses, index = 0, onComplete = null) {
     opacity: "0",
   });
 
-  // Rest of animation code remains the same
   let wobblePhase = 0;
   let fadeInComplete = false;
 
   function animate() {
     wobblePhase += 0.1;
-    const wobble = Math.sin(wobblePhase) * 1; // Reduced wobble amplitude
+    const wobble = Math.sin(wobblePhase) * 1;
     const scale = fadeInComplete
       ? 1 + Math.sin(wobblePhase * 0.5) * 0.03
       : 0.5 + (1 - 0.5) * guess.style.opacity;
@@ -425,7 +406,6 @@ function showGuessesSequentially(guesses, index = 0, onComplete = null) {
 
       if (newOpacity >= 1) {
         fadeInComplete = true;
-        // Increased delay between guesses
         setTimeout(
           () => showGuessesSequentially(guesses, index + 1, onComplete),
           400
@@ -457,7 +437,6 @@ function finishMasterpiece() {
     return;
   }
 
-  // Convert SVG to WebP before sending to API
   svgToWebp(svg).then((webpData) => {
     fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -496,15 +475,14 @@ function finishMasterpiece() {
   });
 }
 
-// Touch event handlers
 function handleTouchStart(e) {
-  e.preventDefault(); // Prevent scrolling
+  e.preventDefault();
   isTouch = true;
   startDrawing(e);
 }
 
 function handleTouchMove(e) {
-  e.preventDefault(); // Prevent scrolling
+  e.preventDefault();
   draw(e);
 }
 
@@ -517,9 +495,7 @@ function showScoreButtons() {
   losePointButton.style.display = "inline-block";
 }
 
-// Modify the hideScoreButtons function to reset the game
 function hideScoreButtons() {
   gainPointButton.style.display = "none";
   losePointButton.style.display = "none";
-  // Start new drawing automatically when hiding score buttons
 }
