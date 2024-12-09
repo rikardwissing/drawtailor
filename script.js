@@ -101,6 +101,8 @@ function getCoordinates(e) {
 
 function startDrawing(e) {
   isDrawing = true;
+  document.body.style.overflow = 'hidden'; // Prevent scrolling
+  document.body.style.touchAction = 'none'; // Prevent touch actions
   brushColor = document.querySelector('.color-button.selected').dataset.color;
   // Remove brushSize input parsing
   const coords = getCoordinates(e);
@@ -200,6 +202,8 @@ function animatePath(pathElement) {
 // Remove canvas-related code from stopDrawing
 function stopDrawing(e) {
   isDrawing = false;
+  document.body.style.overflow = ''; // Restore scrolling
+  document.body.style.touchAction = ''; // Restore touch actions
   currentPath = null;
   isTouch = false;
   previousCoords = null;
@@ -427,6 +431,7 @@ function showGuessesSequentially(guesses, index = 0, onComplete = null) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  svg.style.touchAction = 'none';
   startNewDrawing();
 });
 
@@ -485,6 +490,7 @@ function finishMasterpiece() {
 // Update handleTouchStart to prevent double-firing on mobile
 function handleTouchStart(e) {
   e.preventDefault();
+  e.stopPropagation();
   if (e.touches.length === 1) {
     isTouch = true;
     startDrawing(e);
@@ -493,6 +499,7 @@ function handleTouchStart(e) {
 
 function handleTouchMove(e) {
   e.preventDefault();
+  e.stopPropagation();
   draw(e);
 }
 
