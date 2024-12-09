@@ -51,6 +51,16 @@ document.querySelectorAll('.color-button').forEach(button => {
   });
 });
 
+// Add touch handling for the color buttons
+document.querySelectorAll('.color-button').forEach(button => {
+  button.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    document.querySelectorAll('.color-button').forEach(b => b.classList.remove('selected'));
+    e.target.classList.add('selected');
+    brushColor = e.target.dataset.color;
+  });
+});
+
 // Remove brushSizeInput event listener
 
 clearButton.addEventListener("click", clearCanvas);
@@ -72,19 +82,20 @@ losePointButton.addEventListener("click", () => {
 
 // Functions
 function getCoordinates(e) {
+  const rect = svg.getBoundingClientRect();
+  const scaleX = rect.width / svg.viewBox.baseVal.width;
+  const scaleY = rect.height / svg.viewBox.baseVal.height;
+  
   if (e.touches) {
-    // Touch event
     const touch = e.touches[0];
-    const rect = svg.getBoundingClientRect();
     return {
-      offsetX: touch.clientX - rect.left,
-      offsetY: touch.clientY - rect.top,
+      offsetX: (touch.clientX - rect.left) / scaleX,
+      offsetY: (touch.clientY - rect.top) / scaleY
     };
   }
-  const rect = svg.getBoundingClientRect();
   return {
-    offsetX: e.clientX - rect.left,
-    offsetY: e.clientY - rect.top,
+    offsetX: (e.clientX - rect.left) / scaleX,
+    offsetY: (e.clientY - rect.top) / scaleY
   };
 }
 
@@ -471,10 +482,13 @@ function finishMasterpiece() {
   });
 }
 
+// Update handleTouchStart to prevent double-firing on mobile
 function handleTouchStart(e) {
   e.preventDefault();
-  isTouch = true;
-  startDrawing(e);
+  if (e.touches.length === 1) {
+    isTouch = true;
+    startDrawing(e);
+  }
 }
 
 function handleTouchMove(e) {
