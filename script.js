@@ -12,6 +12,8 @@ const losePointButton = document.getElementById("losePointButton");
 const scoreDisplay = document.getElementById("scoreDisplay");
 let currentScore = 0;
 
+let hasDrawn = false; // Add this with other state variables at the top
+
 // Disable drawing initially
 svg.classList.add("svg-disabled");
 toolsContainer.classList.add("submitted");
@@ -118,6 +120,12 @@ function startDrawing(e) {
   currentPath.setAttribute("pointer-events", "none"); // Prevent path from capturing events
 
   svg.appendChild(currentPath);
+  
+  if (!hasDrawn) {
+    hasDrawn = true;
+    doneButton.disabled = false;
+    clearButton.disabled = false;
+  }
 
   previousCoords = coords; // Initialize previous coordinates
 }
@@ -214,6 +222,9 @@ function clearCanvas() {
   while (svg.firstChild) {
     svg.removeChild(svg.firstChild);
   }
+  hasDrawn = false;
+  doneButton.disabled = true;
+  clearButton.disabled = true;
 }
 
 // Remove saveDrawing and interpretDrawing functions
@@ -258,7 +269,9 @@ function disableDrawing() {
 function enableDrawing() {
   svg.classList.remove("svg-disabled");
   toolsContainer.classList.remove("submitted");
-  doneButton.disabled = false;
+  doneButton.disabled = true; // Always start with disabled submit button
+  clearButton.disabled = true; // Always start with disabled submit button
+  hasDrawn = false;
 }
 
 const mockChallenges = [
