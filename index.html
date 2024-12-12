@@ -148,38 +148,58 @@
   </style>
 </head>
 <body>
-  <h1>Drawtailor!</h1>
-  <div class="score-container">
-    <div id="scoreDisplay">Score: 0</div>
-  </div>
-  <div id="drawingPrompt" style="margin-bottom: 20px; font-size: 1.2em;"></div>
-  <div class="drawing-container">
-    <svg id="drawingSvg" width="600" height="400" viewBox="0 0 600 400">
-      <!-- Remove the filters section -->
-    </svg>
-    <div class="guess-container" id="guessContainer"></div>
-  </div>
-  <div class="tools">
-    <div class="drawing-controls">
-      <div class="color-palette">
-        <button class="color-button selected" data-color="#000000" style="background-color: #000000"></button>
-        <button class="color-button" data-color="#ff0000" style="background-color: #ff0000"></button>
-        <button class="color-button" data-color="#0000ff" style="background-color: #0000ff"></button>
-        <button class="color-button" data-color="#008000" style="background-color: #008000"></button>
-        <button class="color-button" data-color="#800080" style="background-color: #800080"></button>
-        <button class="color-button" data-color="#ffa500" style="background-color: #ffa500"></button>
-        <button class="color-button" data-color="#8B4513" style="background-color: #8B4513"></button>
+  <div id="networkUI" class="network-ui">
+      <input id="playerName" placeholder="Enter your name" required>
+      <div class="peer-info">Your ID: <span id="peerId">Connecting...</span></div>
+      <div class="connection-buttons">
+          <button id="createRoom">Host Game</button>
+          <div class="join-container">
+              <input id="roomInput" placeholder="Host ID">
+              <button id="joinRoom">Join Game</button>
+          </div>
       </div>
-      <div class="drawing-buttons">
-        <button id="clearButton">Clear</button>
-        <button id="doneButton">Submit!</button>
+  </div>
+  
+  <div id="lobby" class="lobby">
+      <h3>Game Lobby</h3>
+      <div id="playerList"></div>
+      <button id="startGame" class="hidden">Start Game</button>
+  </div>
+
+  <div id="gameUI" class="game-ui">
+    <h1>Drawtailor!</h1>
+    <div class="score-container">
+      <div id="scoreDisplay">Score: 0</div>
+    </div>
+    <div id="drawingPrompt" style="margin-bottom: 20px; font-size: 1.2em;"></div>
+    <div class="drawing-container">
+      <svg id="drawingSvg" width="600" height="400" viewBox="0 0 600 400">
+      </svg>
+      <div class="guess-container" id="guessContainer"></div>
+    </div>
+    <div class="tools">
+      <div class="drawing-controls">
+        <div class="color-palette">
+          <button class="color-button selected" data-color="#000000" style="background-color: #000000"></button>
+          <button class="color-button" data-color="#ff0000" style="background-color: #ff0000"></button>
+          <button class="color-button" data-color="#0000ff" style="background-color: #0000ff"></button>
+          <button class="color-button" data-color="#008000" style="background-color: #008000"></button>
+          <button class="color-button" data-color="#800080" style="background-color: #800080"></button>
+          <button class="color-button" data-color="#ffa500" style="background-color: #ffa500"></button>
+          <button class="color-button" data-color="#8B4513" style="background-color: #8B4513"></button>
+        </div>
+        <div class="drawing-buttons">
+          <button id="clearButton">Clear</button>
+          <button id="doneButton">Submit!</button>
+        </div>
+      </div>
+      <div class="submit-controls">
+        <button id="gainPointButton">I got it right! (+1)</button>
+        <button id="losePointButton">I got it wrong (-1)</button>
       </div>
     </div>
-    <div class="submit-controls">
-      <button id="gainPointButton">I got it right! (+1)</button>
-      <button id="losePointButton">I got it wrong (-1)</button>
-    </div>
   </div>
-  <script src="script.js"></script>
+  
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>
